@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, '.')));
 app.post('/api/chat', async (req, res) => {
     const model = req.body.model || 'qwen-turbo';
     const apiKey = req.headers.authorization;
-    
+
     if (!apiKey) {
         return res.status(401).json({ error: 'API Key is required' });
     }

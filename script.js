@@ -85,7 +85,7 @@ paragraphContainer.addEventListener('drop', (e) => {
         const scrollTop = paragraphContainer.scrollTop; // 获取容器的垂直滚动位置
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top + scrollTop; // 加上滚动偏移
-        
+
         // 创建新卡片
         const card = markdownHandler.createCard(content);
         card.style.left = `${x - 150}px`; // 卡片宽度的一半
@@ -170,7 +170,7 @@ submitButton.addEventListener('click', async () => {
         // 获取替换了占位符的提示词
         const prompt = selectedCard.getPromptWithConnections();
         const modelInfo = window.getCurrentModel();
-        
+
         // 获取实际使用的模型名称
         let actualModel = '';
         if (modelInfo.model === 'tongyi') {
@@ -182,7 +182,7 @@ submitButton.addEventListener('click', async () => {
         } else if (modelInfo.model === 'custom' && API_CONFIG.CUSTOM_MODEL) {
             actualModel = API_CONFIG.CUSTOM_MODEL.MODEL;
         }
-        
+
         console.log('提示词:', prompt);
 
         promptOutput.textContent = 'AI思考中...';
@@ -225,7 +225,7 @@ document.getElementById('import-button').addEventListener('click', () => {
 // 导出Markdown文件
 document.getElementById('export-button').addEventListener('click', () => {
     const cards = Array.from(document.querySelectorAll('.paragraph-card'));
-    
+
     // 按y坐标排序，y相同时按x坐标排序
     cards.sort((a, b) => {
         const aY = parseInt(a.style.top);
@@ -246,17 +246,17 @@ document.getElementById('export-button').addEventListener('click', () => {
 
     // 创建Blob对象
     const blob = new Blob([content], { type: 'text/markdown' });
-    
+
     // 创建下载链接
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = 'exported_document.md';
-    
+
     // 触发下载
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-    
+
     // 清理URL对象
     URL.revokeObjectURL(downloadLink.href);
 });
@@ -266,7 +266,7 @@ document.getElementById('clear-paragraphs').addEventListener('click', () => {
     if (confirm('确定要删除所有段落卡片吗？此操作不可撤销。')) {
         // 清空所有段落卡片
         paragraphContainer.innerHTML = '';
-        
+
         // 清除所有连接
         if (window.connectionManager) {
             window.connectionManager.clearAllConnections();
@@ -332,15 +332,15 @@ function showCustomModelDialog() {
         };
 
         // 提示用户保存配置到 config.js
-        const configText = 
-`请将以下配置复制到你的 config.js 文件中的 CUSTOM_MODEL 部分：
+        const configText =
+            `请将以下配置复制到你的 config.js 文件中的 CUSTOM_MODEL 部分：
 
 CUSTOM_MODEL: {
     BASE_URL: '${baseUrl}',
     API_KEY: '${apiKey}',
     MODEL: '${model}'
 },`;
-        
+
         console.log('新的自定义模型配置：');
         console.log(configText);
         alert('配置已更新！请记得将新的配置保存到 config.js 文件中。\n\n配置信息已输出到控制台，你可以直接复制使用。');
@@ -396,17 +396,17 @@ async function showOllamaDialog() {
         if (!healthCheck.ok) {
             throw new Error('无法连接到 Ollama 服务');
         }
-        
+
         // 获取已安装的模型列表
         const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
         if (!response.ok) {
             throw new Error('无法获取模型列表');
         }
-        
+
         const data = await response.json();
         const modelList = dialog.querySelector('.model-list');
         const confirmBtn = dialog.querySelector('.confirm-btn');
-        
+
         // 检查是否有模型
         if (data.models && data.models.length > 0) {
             modelList.innerHTML = data.models.map(model => {
@@ -416,7 +416,7 @@ async function showOllamaDialog() {
                 const paramSize = model.details?.parameter_size || '未知';
                 // 获取量化级别
                 const quantLevel = model.details?.quantization_level || '未知';
-                
+
                 return `
                     <div class="model-option" data-name="${model.name}">
                         <input type="radio" name="ollama-model" id="model-${model.name}" value="${model.name}">
@@ -474,10 +474,10 @@ function initializeModelSelector() {
     const modelSelector = document.getElementById('model-selector');
     const modelDropdown = document.querySelector('.model-dropdown');
     const modelOptions = document.querySelectorAll('.model-option');
-    
+
     // 设置默认模型为通义千问
     let currentModel = 'tongyi';
-    
+
     // 设置初始选中状态
     modelOptions.forEach(opt => {
         if (opt.dataset.model === 'tongyi') {
@@ -499,17 +499,17 @@ function initializeModelSelector() {
         option.addEventListener('click', (e) => {
             e.stopPropagation();
             const model = option.dataset.model;
-            
+
             if (model === 'custom') {
                 showCustomModelDialog();
             } else if (model === 'ollama') {
                 showOllamaDialog();
             }
-            
+
             // 更新选中状态
             modelOptions.forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
-            
+
             currentModel = model;
             modelDropdown.classList.remove('show');
             modelSelector.classList.remove('active');
@@ -533,7 +533,7 @@ function initializeModelSelector() {
 // 修改 callAIAPI 函数
 async function callAIAPI(message, model) {
     const modelInfo = window.getCurrentModel();
-    
+
     // Ollama 模式，不受开发模式影响
     if (modelInfo.model === 'ollama') {
         if (!window.ollamaModel) {
@@ -569,9 +569,9 @@ async function callAIAPI(message, model) {
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    try{
+                    try {
                         const chunk = JSON.parse(decoder.decode(value, { stream: true }));
-                        if(chunk.response) {
+                        if (chunk.response) {
                             result += chunk.response;
                             promptOutput.textContent += chunk.response;
                             promptOutput.scrollTop = promptOutput.scrollHeight;
@@ -588,7 +588,7 @@ async function callAIAPI(message, model) {
             throw error;
         }
     }
-    
+
     // 在本地模式下，除了 Ollama 外的其他模型都使用模拟数据
     if (isDevelopment) {
         console.log('本地模式');
@@ -677,7 +677,7 @@ async function callAIAPI(message, model) {
                         }
                     ],
                     stream: true,
-                    stream_options:{
+                    stream_options: {
                         include_usage: true
                     }
                 })
@@ -726,8 +726,8 @@ async function callAIAPI(message, model) {
             throw new Error('DeepSeek API 密钥未配置');
         }
 
-        const modelName = modelInfo.model === 'deepseek-v3' ? 
-            MODEL_CONFIG.DEEPSEEK.MODELS.V3 : 
+        const modelName = modelInfo.model === 'deepseek-v3' ?
+            MODEL_CONFIG.DEEPSEEK.MODELS.V3 :
             MODEL_CONFIG.DEEPSEEK.MODELS.R1;
 
         try {
@@ -750,7 +750,7 @@ async function callAIAPI(message, model) {
                         }
                     ],
                     stream: true,
-                    stream_options:{
+                    stream_options: {
                         include_usage: true
                     }
                 })
@@ -797,7 +797,7 @@ async function callAIAPI(message, model) {
             throw error;
         }
     }
-    
+
     return mockApiCall(message, model);
 }
 
@@ -806,7 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeCardManagement();
     // 初始化模型选择器
     initializeModelSelector();
-    
+
     // ... existing initialization code ...
 });
 
@@ -839,7 +839,7 @@ function selectCard(cardId) {
             this.selectedCard = card;
         }
     }
-    
+
     if (this.onCardSelected) {
         this.onCardSelected(this.selectedCard);
     }

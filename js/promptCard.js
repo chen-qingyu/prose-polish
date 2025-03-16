@@ -32,11 +32,11 @@ export class PromptCard {
         const regex = /\{\{([^}]+)\}\}/g;
         const placeholders = [];
         let match;
-        
+
         while ((match = regex.exec(text)) !== null) {
             placeholders.push(match[1].trim());
         }
-        
+
         return placeholders;
     }
 
@@ -44,15 +44,15 @@ export class PromptCard {
     updateContent(title, prompt) {
         this.title = title;
         this.prompt = prompt;
-        
+
         // 检测新的占位符
         const newPlaceholders = this.detectPlaceholders(prompt);
-        
+
         // 如果占位符数量或内容发生变化，需要重新创建端口
         if (JSON.stringify(this.placeholders) !== JSON.stringify(newPlaceholders)) {
             this.placeholders = newPlaceholders;
             this.connections = new Array(this.placeholders.length).fill(null);
-            
+
             // 移除旧的端口和连接
             const portContainer = this.element.querySelector('.port-container');
             if (portContainer) {
@@ -65,7 +65,7 @@ export class PromptCard {
                 });
                 portContainer.innerHTML = '';
             }
-            
+
             // 创建新的端口
             this.createPorts(portContainer);
         }
@@ -79,7 +79,7 @@ export class PromptCard {
         const card = document.createElement('div');
         card.className = 'prompt-card';
         card.id = this.id;
-        
+
         // 创建卡片内容，使用HTML转义来防止XSS攻击
         const escapeHtml = (unsafe) => {
             return unsafe
@@ -89,7 +89,7 @@ export class PromptCard {
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         };
-        
+
         card.innerHTML = `
             <div class="card-actions">
                 <button class="edit-btn">✎</button>
@@ -116,7 +116,7 @@ export class PromptCard {
                         window.connectionManager.removePortConnection(port);
                     });
                 }
-                
+
                 // 从卡片管理器中移除
                 window.cardManager.deleteCard(this.id);
             }
@@ -131,17 +131,17 @@ export class PromptCard {
             const port = document.createElement('div');
             port.className = 'connection-port';
             port.dataset.portId = `${this.id}_port_${index + 1}`;
-            
+
             // 添加 SVG 内容
             port.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path d="M 285.289001 471.220001 L 285.289001 512 L 226.710999 512 L 226.710999 471.220001 L 208.067993 471.220001 C 193.807007 471.220001 182.238998 459.653015 182.238998 445.391998 L 182.238998 369.692993 C 134.914001 348.251007 101.968002 300.639008 101.968002 245.307007 L 101.968002 188.338013 L 101.969002 188.338013 L 101.969002 121.496002 L 158.378006 121.496002 L 158.378006 13.533997 C 158.378006 6.059998 164.431 0 171.904999 0 L 193.526993 0 C 201.001007 0 207.054001 6.059998 207.052994 13.533997 L 207.052994 121.496002 L 304.945007 121.496002 L 304.945007 13.533997 C 304.945007 6.059998 311.005005 0 318.471985 0 L 340.10199 0 C 347.569 0 353.622009 6.059998 353.622009 13.533997 L 353.622009 121.496002 L 410.032013 121.496002 L 410.032013 203.458008 L 410.031006 203.458008 L 410.031006 245.307007 C 410.031006 300.639008 377.09201 348.252014 329.76001 369.692993 L 329.76001 445.391998 C 329.76001 459.653015 318.199005 471.220001 303.931 471.220001 L 285.289001 471.220001 Z"/>
             </svg>`;
-            
+
             // 添加占位符名称标签
             const label = document.createElement('span');
             label.className = 'port-label';
             label.textContent = placeholder;
-            
+
             port.appendChild(label);
             container.appendChild(port);
         });
@@ -180,7 +180,7 @@ export class PromptCard {
         let result = this.prompt;
         this.placeholders.forEach((placeholder, index) => {
             const pattern = new RegExp(`\\{\\{${placeholder}\\}\\}`, 'g');
-            
+
             // 获取直接连接的文本卡片
             const startCard = this.getConnectedTextCard(index);
             if (!startCard) {
@@ -192,7 +192,7 @@ export class PromptCard {
             const combinedContent = contents.join('\\n');
             result = result.replace(pattern, combinedContent);
         });
-        
+
         // 只输出最终的提示词
         return result;
     }
@@ -219,7 +219,7 @@ export class PromptCard {
 
         while (currentCard && !visited.has(currentCard.dataset.cardId)) {
             visited.add(currentCard.dataset.cardId);
-            
+
             // 添加当前卡片的文本内容
             const content = currentCard.querySelector('.card-content').textContent.trim();
             if (content) {
@@ -294,7 +294,7 @@ export class PromptCardManager {
     // 添加新卡片
     addCard(title, prompt) {
         let card = new PromptCard(generateUniqueId(), title, prompt);
-        
+
         while (this.isIdExists(card.id)) {
             card = new PromptCard(generateUniqueId(), title, prompt);
         }
@@ -354,7 +354,7 @@ export class PromptCardManager {
                 this.selectedCard = card;
             }
         }
-        
+
         if (this.onCardSelected) {
             this.onCardSelected(this.selectedCard);
         }
@@ -434,22 +434,22 @@ export function importCards() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    
+
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         try {
             const text = await file.text();
             const cardsData = JSON.parse(text);
-            
+
             if (!Array.isArray(cardsData)) {
                 throw new Error('无效的卡片数据格式');
             }
-            
+
             // 获取cardManager实例
             const cardManager = window.cardManager;
-            
+
             // 添加新卡片（追加到现有卡片后面）
             cardsData.forEach(cardData => {
                 if (cardData.title && cardData.prompt) {
@@ -464,7 +464,7 @@ export function importCards() {
             alert('导入失败：' + error.message);
         }
     };
-    
+
     input.click();
 }
 
@@ -474,15 +474,15 @@ export function initializeCardManagement() {
     const importButton = document.getElementById('import-cards');
     const clearButton = document.getElementById('clear-cards');
     const clearConnectionsButton = document.getElementById('clear-connections');
-    
+
     exportButton.addEventListener('click', exportCards);
     importButton.addEventListener('click', importCards);
-    
+
     // 添加清空功能
     clearButton.addEventListener('click', () => {
         if (confirm('确定要删除所有提示词卡片吗？此操作不可撤销。')) {
             const cardsContainer = document.querySelector('.prompt-cards');
-            
+
             // 先删除所有提示词卡片的连接
             cardsContainer.querySelectorAll('.prompt-card').forEach(card => {
                 const ports = card.querySelectorAll('.connection-port');
@@ -492,7 +492,7 @@ export function initializeCardManagement() {
                     });
                 }
             });
-            
+
             // 然后清空容器和卡片管理器
             cardsContainer.innerHTML = '';
             window.cardManager.cards.clear();
@@ -504,13 +504,13 @@ export function initializeCardManagement() {
         // 清除所有SVG连线
         const connectionsContainer = document.querySelector('.connections-container');
         connectionsContainer.innerHTML = '';
-        
+
         // 清除所有端口的连接状态
         document.querySelectorAll('.connection-port, .text-card-port').forEach(port => {
             port.classList.remove('connected');
             port.classList.remove('connecting');
         });
-        
+
         // 重置所有卡片的连接状态
         window.cardManager.cards.forEach(card => {
             card.connections = new Array(card.placeholders.length).fill(null);

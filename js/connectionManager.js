@@ -6,7 +6,7 @@ export class ConnectionManager {
         this.svgContainer = document.querySelector('.connections-container');
         this.currentConnection = null; // 当前正在创建的连接
         this.startPort = null; // 开始连接的端口
-        
+
         this.setupEventListeners();
         this.setupScrollListeners();
     }
@@ -26,7 +26,7 @@ export class ConnectionManager {
                     // 获取卡片的坐标
                     const cardRect = card.getBoundingClientRect();
                     // 触发卡片的拖动逻辑，并传入相对坐标
-                    card.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: e.clientX, clientY: e.clientY}));
+                    card.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: e.clientX, clientY: e.clientY }));
                 }
                 return;
             }
@@ -96,7 +96,7 @@ export class ConnectionManager {
             const portId = port.dataset.cardId;
             const chainConnectionId = this.portConnections.get(`${portId}_chain`);
             const promptConnectionId = this.portConnections.get(`${portId}_prompt`);
-            
+
             // 检查是否已经有连接
             if (chainConnectionId !== undefined || promptConnectionId !== undefined) {
                 return true; // 如果已经有连接，返回
@@ -112,12 +112,12 @@ export class ConnectionManager {
             }
             return false;
         }
-        
+
         // 对于紫色插头，只检查它自己的连接状态
         if (port.classList.contains('text-card-chain-port')) {
             return this.portConnections.has(port.dataset.cardId);
         }
-        
+
         // 对于提示词卡片的黄色插头，保持单一连接
         return this.portConnections.has(port.dataset.portId);
     }
@@ -126,7 +126,7 @@ export class ConnectionManager {
     addPortConnection(port1, port2, connectionId) {
         const port1Id = port1.dataset.portId || port1.dataset.cardId;
         const port2Id = port2.dataset.portId || port2.dataset.cardId;
-        
+
         // 如果是文本卡片的蓝色插座，使用复合键来存储不同类型的连接
         if (port2.classList.contains('text-card-port')) {
             const connectionType = port1.classList.contains('text-card-chain-port') ? 'chain' : 'prompt';
@@ -134,7 +134,7 @@ export class ConnectionManager {
         } else {
             this.portConnections.set(port2Id, connectionId);
         }
-        
+
         // 对于发起连接的端口，始终使用单一连接
         this.portConnections.set(port1Id, connectionId);
     }
@@ -152,7 +152,7 @@ export class ConnectionManager {
     removePortConnection(port) {
         const isTextCardPort = port.classList.contains('text-card-port');
         let connectionIds = [];
-        
+
         if (isTextCardPort) {
             // 对于文本卡片的蓝色插座，获取所有类型的连接
             const portId = port.dataset.cardId;
@@ -160,10 +160,10 @@ export class ConnectionManager {
             const promptConnectionId = this.portConnections.get(`${portId}_prompt`);
             if (chainConnectionId) connectionIds.push(chainConnectionId);
             if (promptConnectionId) connectionIds.push(promptConnectionId);
-            
+
             // 移除连接类型标识
             port.classList.remove('prompt-connected', 'chain-connected');
-            
+
             // 确保SVG恢复初始状态（无旋转）
             const svg = port.querySelector('svg');
             if (svg) {
@@ -182,7 +182,7 @@ export class ConnectionManager {
                 // 移除连接状态类
                 connection.startPort.classList.remove('connected');
                 connection.endPort.classList.remove('connected');
-                
+
                 // 确保蓝色插座恢复初始状态
                 if (connection.endPort.classList.contains('text-card-port')) {
                     const svg = connection.endPort.querySelector('svg');
@@ -190,11 +190,11 @@ export class ConnectionManager {
                         // svg.style.transform = 'none';
                     }
                     connection.endPort.classList.remove('prompt-connected', 'chain-connected');
-                    
+
                     // 恢复原始SVG路径
                     const path = connection.endPort.querySelector('path');
                     path.setAttribute('d', 'M 512 256 C 512 114.615112 397.384888 0 256 0 C 114.615105 0 0 114.615112 0 256 C 0 397.384888 114.615105 512 256 512 C 397.384888 512 512 397.384888 512 256 Z M 40 256 C 40 136.706482 136.706497 40 256 40 C 375.293518 40 472 136.706482 472 256 C 472 375.293518 375.293518 472 256 472 C 136.706497 472 40 375.293518 40 256 Z M 255.27803 429.907074 C 159.728485 429.907074 82 352.171173 82 256.629089 C 82 161.086945 159.732193 83.354767 255.27803 83.354767 C 350.816406 83.354767 428.552307 161.086945 428.552307 256.629089 C 428.552307 352.174866 350.816406 429.907074 255.27803 429.907074 Z M 181.997467 230.213196 C 167.426392 230.213196 155.581589 242.061707 155.581589 256.629089 C 155.581589 271.196442 167.426392 283.044922 181.997467 283.044922 C 196.564819 283.044922 208.41333 271.196442 208.41333 256.629089 C 208.41333 242.061707 196.564819 230.213196 181.997467 230.213196 Z M 330.441895 230.213196 C 315.870789 230.213196 304.022308 242.061707 304.022308 256.629089 C 304.022308 271.196442 315.870789 283.044922 330.441895 283.044922 C 345.005524 283.044922 356.857788 271.196442 356.857788 256.629089 C 356.857788 242.061707 345.005524 230.213196 330.441895 230.213196 Z');
-                    
+
                     // 移除第二个路径
                     const path2 = connection.endPort.querySelector('path:nth-child(2)');
                     if (path2) {
@@ -210,7 +210,7 @@ export class ConnectionManager {
                 // 清理端口连接状态
                 const startPort = connection.startPort;
                 const endPort = connection.endPort;
-                
+
                 if (startPort.classList.contains('text-card-chain-port')) {
                     this.portConnections.delete(`${endPort.dataset.cardId}_chain`);
                 } else if (startPort.classList.contains('connection-port')) {
@@ -280,7 +280,7 @@ export class ConnectionManager {
         endPort.classList.add('connected');
 
         // 修改SVG路径
-        if (this.startPort.classList.contains('text-card-chain-port') || 
+        if (this.startPort.classList.contains('text-card-chain-port') ||
             this.startPort.classList.contains('connection-port')) {
             const path = this.startPort.querySelector('path');
             path.setAttribute('d', 'M 82 256.629089 C 82 352.171173 159.728485 429.907074 255.27803 429.907074 C 350.816406 429.907074 428.552307 352.174866 428.552307 256.629089 C 428.552307 161.086945 350.816406 83.354767 255.27803 83.354767 C 159.732193 83.354767 82 161.086945 82 256.629089 Z M 255.277603 390.354767 C 181.538361 390.354767 121.552307 330.362976 121.552307 256.629517 C 121.552307 182.895966 181.541214 122.907074 255.277603 122.907074 C 329.00824 122.907074 389 182.895966 389 256.629517 C 389 330.365845 329.00824 390.354767 255.277603 390.354767 Z M 255.277161 164 C 204.199738 164 162.645233 205.554504 162.645233 256.629944 C 162.645233 307.705353 204.197754 349.261841 255.277161 349.261841 C 306.350586 349.261841 347.907074 307.707336 347.907074 256.629944 C 347.907074 205.554504 306.350586 164 255.277161 164 Z');
@@ -291,7 +291,7 @@ export class ConnectionManager {
             const path = endPort.querySelector('path');
             // 设置第一个路径
             path.setAttribute('d', 'M 148 23.829071 C 60.587349 64.560425 0 153.204742 0 256 C 0 397.384888 114.615105 512 256 512 C 397.384888 512 512 397.384888 512 256 C 512 152.813232 450.950226 63.885376 363 23.365753 L 363 68.322052 C 428.113617 105.525055 472 175.637421 472 256 C 472 375.293518 375.293518 472 256 472 C 136.706497 472 40 375.293518 40 256 C 40 176.0495 83.437454 106.244354 148 68.896942 L 148 23.829071 Z');
-            
+
             // 添加第二个路径
             let path2 = endPort.querySelector('path:nth-child(2)');
             if (!path2) {
@@ -327,7 +327,7 @@ export class ConnectionManager {
         this.addPortConnection(this.startPort, endPort, connectionId);
 
         // 处理不同类型的连接
-        if (this.startPort.classList.contains('text-card-chain-port') || 
+        if (this.startPort.classList.contains('text-card-chain-port') ||
             endPort.classList.contains('text-card-chain-port')) {
             // 文本卡片链接
             this.handleChainConnection(this.startPort, endPort);
@@ -343,7 +343,7 @@ export class ConnectionManager {
         const startY = startRect.top + startRect.height / 2;
         const endX = endRect.left + endRect.width / 2;
         const endY = endRect.top + endRect.height / 2;
-        
+
         const path = this.createCurvePath(startX, startY, endX, endY);
         this.currentConnection.setAttribute('d', path);
 
@@ -358,20 +358,20 @@ export class ConnectionManager {
             this.currentConnection.remove();
             this.currentConnection = null;
         }
-        
+
         if (this.startPort) {
             this.startPort.classList.remove('connecting');
-            
+
             // 如果是提示词卡片的端口或文本卡片的链式端口，需要恢复原始的插头形状
-            if (this.startPort.classList.contains('connection-port') || 
+            if (this.startPort.classList.contains('connection-port') ||
                 this.startPort.classList.contains('text-card-chain-port')) {
                 const path = this.startPort.querySelector('path');
                 path.setAttribute('d', 'M 285.289001 471.220001 L 285.289001 512 L 226.710999 512 L 226.710999 471.220001 L 208.067993 471.220001 C 193.807007 471.220001 182.238998 459.653015 182.238998 445.391998 L 182.238998 369.692993 C 134.914001 348.251007 101.968002 300.639008 101.968002 245.307007 L 101.968002 188.338013 L 101.969002 188.338013 L 101.969002 121.496002 L 158.378006 121.496002 L 158.378006 13.533997 C 158.378006 6.059998 164.431 0 171.904999 0 L 193.526993 0 C 201.001007 0 207.054001 6.059998 207.052994 13.533997 L 207.052994 121.496002 L 304.945007 121.496002 L 304.945007 13.533997 C 304.945007 6.059998 311.005005 0 318.471985 0 L 340.10199 0 C 347.569 0 353.622009 6.059998 353.622009 13.533997 L 353.622009 121.496002 L 410.032013 121.496002 L 410.032013 203.458008 L 410.031006 203.458008 L 410.031006 245.307007 C 410.031006 300.639008 377.09201 348.252014 329.76001 369.692993 L 329.76001 445.391998 C 329.76001 459.653015 318.199005 471.220001 303.931 471.220001 L 285.289001 471.220001 Z');
             }
-            
+
             this.startPort = null;
         }
-        
+
         document.body.classList.remove('connecting-mode');
     }
 
@@ -383,15 +383,15 @@ export class ConnectionManager {
         if (this.isPortConnected(endPort)) return false;
 
         // 检查是否是文本卡片之间的链接
-        const isChainConnection = startPort.classList.contains('text-card-chain-port') || 
-                                endPort.classList.contains('text-card-chain-port');
-        
+        const isChainConnection = startPort.classList.contains('text-card-chain-port') ||
+            endPort.classList.contains('text-card-chain-port');
+
         if (isChainConnection) {
             // 文本卡片链接的规则：
             // 1. 一个是紫色插头，一个是蓝色插座
             const isStartChain = startPort.classList.contains('text-card-chain-port');
             const isEndSocket = endPort.classList.contains('text-card-port');
-            
+
             // 2. 防止形成环
             if (isStartChain && isEndSocket) {
                 return !this.wouldFormLoop(startPort, endPort);
@@ -412,27 +412,27 @@ export class ConnectionManager {
     wouldFormLoop(startPort, endPort) {
         const startCard = startPort.closest('.paragraph-card');
         const endCard = endPort.closest('.paragraph-card');
-        
+
         // 检查是否已经存在从终点到起点的路径
         const visited = new Set();
         const checkPath = (currentCard) => {
             if (currentCard === startCard) return true;
             if (visited.has(currentCard)) return false;
-            
+
             visited.add(currentCard);
             const chainPort = currentCard.querySelector('.text-card-chain-port');
             if (!chainPort) return false;
-            
+
             const connectionId = this.portConnections.get(chainPort.dataset.cardId);
             if (!connectionId) return false;
-            
+
             const connection = this.connections.get(connectionId);
             if (!connection) return false;
-            
+
             const nextCard = connection.endPort.closest('.paragraph-card');
             return checkPath(nextCard);
         };
-        
+
         return checkPath(endCard);
     }
 
@@ -443,14 +443,14 @@ export class ConnectionManager {
 
         // 检查是否是文本卡片之间的链接（通过检查起点是否是紫色插头）
         const isChainConnection = this.startPort?.classList.contains('text-card-chain-port');
-        
+
         if (isChainConnection) {
             // 文本卡片之间的链接：使用竖直控制点
             // 确保终点的控制点永远在终点上方
             const distance = Math.abs(dy); // 计算垂直距离
             const controlY1 = startY + dy * 0.5; // 起点控制点
             const controlY2 = endY - 60; // 终点控制点固定在终点上方50px处
-            
+
             // 如果起点在终点下方，增加控制点的垂直距离以获得更平滑的曲线
             if (startY > endY) {
                 return `M ${startX} ${startY} C ${startX} ${startY - distance * 0.5}, ${endX} ${controlY2}, ${endX} ${endY}`;
@@ -493,10 +493,10 @@ export class ConnectionManager {
             // 临时保存当前的startPort，以便createCurvePath方法使用
             const originalStartPort = this.startPort;
             this.startPort = connection.startPort;
-            
+
             const path = this.createCurvePath(startX, startY, endX, endY);
             connection.line.setAttribute('d', path);
-            
+
             // 恢复原始的startPort
             this.startPort = originalStartPort;
         });
@@ -506,7 +506,7 @@ export class ConnectionManager {
     handleChainConnection(startPort, endPort) {
         const startCard = startPort.closest('.paragraph-card');
         const endCard = endPort.closest('.paragraph-card');
-        
+
         // 记录链接关系
         this.chainConnections.set(startCard.dataset.cardId, endCard.dataset.cardId);
     }
@@ -557,25 +557,25 @@ export class ConnectionManager {
     clearAllConnections() {
         // 获取所有端口
         const allPorts = document.querySelectorAll('.text-card-port, .text-card-chain-port, .connection-port');
-        
+
         // 重置每个端口的状态
         allPorts.forEach(port => {
             // 移除所有连接相关的类
             port.classList.remove('connected', 'prompt-connected', 'chain-connected');
-            
+
             // 重置SVG路径
             if (port.classList.contains('text-card-port')) {
                 // 重置蓝色插座的SVG
                 const path = port.querySelector('path');
                 path.setAttribute('d', 'M 512 256 C 512 114.615112 397.384888 0 256 0 C 114.615105 0 0 114.615112 0 256 C 0 397.384888 114.615105 512 256 512 C 397.384888 512 512 397.384888 512 256 Z M 40 256 C 40 136.706482 136.706497 40 256 40 C 375.293518 40 472 136.706482 472 256 C 472 375.293518 375.293518 472 256 472 C 136.706497 472 40 375.293518 40 256 Z M 255.27803 429.907074 C 159.728485 429.907074 82 352.171173 82 256.629089 C 82 161.086945 159.732193 83.354767 255.27803 83.354767 C 350.816406 83.354767 428.552307 161.086945 428.552307 256.629089 C 428.552307 352.174866 350.816406 429.907074 255.27803 429.907074 Z M 181.997467 230.213196 C 167.426392 230.213196 155.581589 242.061707 155.581589 256.629089 C 155.581589 271.196442 167.426392 283.044922 181.997467 283.044922 C 196.564819 283.044922 208.41333 271.196442 208.41333 256.629089 C 208.41333 242.061707 196.564819 230.213196 181.997467 230.213196 Z M 330.441895 230.213196 C 315.870789 230.213196 304.022308 242.061707 304.022308 256.629089 C 304.022308 271.196442 315.870789 283.044922 330.441895 283.044922 C 345.005524 283.044922 356.857788 271.196442 356.857788 256.629089 C 356.857788 242.061707 345.005524 230.213196 330.441895 230.213196 Z');
-                
+
                 // 移除第二个路径（如果存在）
                 const path2 = port.querySelector('path:nth-child(2)');
                 if (path2) {
                     path2.remove();
                 }
-            } else if (port.classList.contains('text-card-chain-port') || 
-                      port.classList.contains('connection-port')) {
+            } else if (port.classList.contains('text-card-chain-port') ||
+                port.classList.contains('connection-port')) {
                 // 重置紫色插头和黄色插座的SVG
                 const path = port.querySelector('path');
                 path.setAttribute('d', 'M 285.289001 471.220001 L 285.289001 512 L 226.710999 512 L 226.710999 471.220001 L 208.067993 471.220001 C 193.807007 471.220001 182.238998 459.653015 182.238998 445.391998 L 182.238998 369.692993 C 134.914001 348.251007 101.968002 300.639008 101.968002 245.307007 L 101.968002 188.338013 L 101.969002 188.338013 L 101.969002 121.496002 L 158.378006 121.496002 L 158.378006 13.533997 C 158.378006 6.059998 164.431 0 171.904999 0 L 193.526993 0 C 201.001007 0 207.054001 6.059998 207.052994 13.533997 L 207.052994 121.496002 L 304.945007 121.496002 L 304.945007 13.533997 C 304.945007 6.059998 311.005005 0 318.471985 0 L 340.10199 0 C 347.569 0 353.622009 6.059998 353.622009 13.533997 L 353.622009 121.496002 L 410.032013 121.496002 L 410.032013 203.458008 L 410.031006 203.458008 L 410.031006 245.307007 C 410.031006 300.639008 377.09201 348.252014 329.76001 369.692993 L 329.76001 445.391998 C 329.76001 459.653015 318.199005 471.220001 303.931 471.220001 L 285.289001 471.220001 Z');
@@ -584,7 +584,7 @@ export class ConnectionManager {
 
         // 移除所有连接线
         this.svgContainer.innerHTML = '';
-        
+
         // 清空连接记录
         this.connections.clear();
         this.portConnections.clear();
