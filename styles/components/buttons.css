@@ -155,12 +155,25 @@
 .floating-button.circle-danger-button {
   background-color: var(--color-bg-primary);
   color: var(--color-danger);
-  border: 1px solid var(--color-danger);
+  border: 2px solid var(--color-danger);
+  width: 48px;
+  height: 48px;
+  position: fixed;
+  bottom: 120px;
+  right: 20px;
+  z-index: 1000;
 }
 
 .floating-button.circle-danger-button:hover {
   background-color: var(--color-danger);
   color: var(--color-bg-primary);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+.floating-button.circle-danger-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .floating-button.add-paragraph-button {
